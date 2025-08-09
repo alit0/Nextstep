@@ -1,6 +1,6 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import './animations.css';
 import './index.css';
-import './animations.css'; // Importar animaciones optimizadas
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // Importar solo los iconos que se usan en este archivo principal
 import { faCalendarCheck } from '@fortawesome/free-solid-svg-icons/faCalendarCheck';
@@ -12,25 +12,56 @@ import NextstepLogo from './assets/Nextstep.svg';
 function Header() {
   const [isNavActive, setIsNavActive] = useState(false);
   const [isHeaderScrolled, setIsHeaderScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('inicio');
 
   const toggleMobileMenu = () => {
     setIsNavActive(!isNavActive);
   };
 
+  // Método simple de detección por rangos de scroll
   useEffect(() => {
     const handleScroll = () => {
+      // Detectar si el header debe estar scrolled
       if (window.scrollY > 100) {
         setIsHeaderScrolled(true);
       } else {
         setIsHeaderScrolled(false);
       }
+      
+      // Obtener todos los elementos de sección
+      const inicio = document.getElementById('inicio');
+      const nosotros = document.getElementById('nosotros');
+      const servicios = document.getElementById('servicios');
+      const pisada = document.getElementById('pisada');
+      const contacto = document.getElementById('contacto');
+      
+      // Establecer umbrales fijos para cada sección
+      const scrollY = window.scrollY;
+      
+      // Logica simplificada basada en el desplazamiento
+      if (scrollY < nosotros?.offsetTop - 100) {
+        setActiveSection('inicio');
+      } else if (scrollY < servicios?.offsetTop - 100) {
+        setActiveSection('nosotros');
+      } else if (scrollY < pisada?.offsetTop - 100) {
+        setActiveSection('servicios');
+      } else if (scrollY < contacto?.offsetTop - 100) {
+        setActiveSection('pisada');
+      } else {
+        setActiveSection('contacto');
+      }
     };
 
+    // Añadir listener
     window.addEventListener('scroll', handleScroll);
+    
+    // Ejecutar inmediatamente
+    handleScroll();
+    
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, []); // Sin dependencia para evitar problemas
 
   return (
     <header className={`header ${isHeaderScrolled ? 'scrolled' : ''}`}>
@@ -40,11 +71,11 @@ function Header() {
         </div>
         <div className={`nav-content ${isNavActive ? 'active' : ''}`}>
           <ul className="nav-links">
-            <li><a href="#inicio" onClick={toggleMobileMenu}>Inicio</a></li>
-            <li><a href="#nosotros" onClick={toggleMobileMenu}>Nosotros</a></li>
-            <li><a href="#servicios" onClick={toggleMobileMenu}>Servicios</a></li>
-            <li><a href="#pisada" onClick={toggleMobileMenu}>Tu Pisada</a></li>
-            <li><a href="#contacto" onClick={toggleMobileMenu}>Contacto</a></li>
+            <li><a href="#inicio" onClick={toggleMobileMenu} className={activeSection === 'inicio' ? 'active' : ''}>Inicio</a></li>
+            <li><a href="#nosotros" onClick={toggleMobileMenu} className={activeSection === 'nosotros' ? 'active' : ''}>Nosotros</a></li>
+            <li><a href="#servicios" onClick={toggleMobileMenu} className={activeSection === 'servicios' ? 'active' : ''}>Servicios</a></li>
+            <li><a href="#pisada" onClick={toggleMobileMenu} className={activeSection === 'pisada' ? 'active' : ''}>Tu Pisada</a></li>
+            <li><a href="#contacto" onClick={toggleMobileMenu} className={activeSection === 'contacto' ? 'active' : ''}>Contacto</a></li>
             <div className="mobile-social">
               <a href="https://www.instagram.com/nextsteep" target="_blank" rel="noopener" title="Instagram">
                 <FontAwesomeIcon icon={faInstagram} />
@@ -275,6 +306,7 @@ function Chatbot() {
     { type: 'bot', text: '¡Hola! 👋 Soy el asistente de Next Step. ¿En qué puedo ayudarte hoy?' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [showAttention, setShowAttention] = useState(false);
 
   const chatbotResponses = {
     '¿Cómo funciona la evaluación?': 'La evaluación es completamente gratuita 🆓. Utilizamos un scanner digital (baropodometría) para analizar tu pisada. Te mostraremos visualmente los puntos de presión y te explicaremos si necesitas plantillas personalizadas. ¡Todo en una sola sesión!',
@@ -314,6 +346,34 @@ function Chatbot() {
     }
   };
 
+  // Efecto para manejar la atención del botón
+  useEffect(() => {
+    // Activar la animación de atención después de 5 segundos si el chat está cerrado
+    const attentionTimeout = setTimeout(() => {
+      if (!chatbotOpen) {
+        setShowAttention(true);
+      }
+    }, 5000);
+    
+    // Mostrar un mensaje recordatorio cada 45 segundos si el chat está cerrado
+    const reminderInterval = setInterval(() => {
+      if (!chatbotOpen && Math.random() > 0.5) { // 50% de probabilidad para no ser muy invasivo
+        setShowAttention(true);
+        
+        // Desactivar el efecto después de 5 segundos
+        setTimeout(() => {
+          setShowAttention(false);
+        }, 5000);
+      }
+    }, 45000); // 45 segundos
+    
+    return () => {
+      clearTimeout(attentionTimeout);
+      clearInterval(reminderInterval);
+    };
+  }, [chatbotOpen]);
+  
+  // Efecto para mantener el scroll del chat hacia abajo
   useEffect(() => {
     const messagesContainer = document.getElementById('chatbot-messages');
     if (messagesContainer) {
@@ -323,7 +383,7 @@ function Chatbot() {
 
   return (
     <>
-      <div className="chatbot-btn" onClick={toggleChatbot}>
+      <div className={`chatbot-btn ${showAttention ? 'chatbot-btn-attention' : ''}`} onClick={toggleChatbot}>
         <FontAwesomeIcon icon={faComments} />
       </div>
       

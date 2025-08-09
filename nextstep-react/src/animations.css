@@ -10,12 +10,72 @@
   }
 }
 
+/* Animación de pulso para el botón del chatbot */
+@keyframes pulseAnimation {
+  0% {
+    box-shadow: 0 0 0 0 rgba(38, 208, 206, 0.9);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(38, 208, 206, 0);
+    transform: scale(1.1);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(38, 208, 206, 0);
+    transform: scale(1);
+  }
+}
+
+/* Animación de rebote para llamar la atención */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-12px);
+  }
+  60% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Animación de brillo */
+@keyframes glowEffect {
+  0% {
+    filter: brightness(100%) drop-shadow(0 0 0px rgba(0, 190, 180, 0.7));
+  }
+  50% {
+    filter: brightness(110%) drop-shadow(0 0 5px rgba(0, 190, 180, 0.9));
+  }
+  100% {
+    filter: brightness(100%) drop-shadow(0 0 0px rgba(0, 190, 180, 0.7));
+  }
+}
+
 /* Clase para elementos que serán animados */
 .animated {
   animation: fadeInUp 0.6s ease forwards;
   will-change: opacity, transform; /* Ayuda al navegador a optimizar las animaciones */
   backface-visibility: hidden; /* Mejora rendimiento en dispositivos móviles */
   perspective: 1000px; /* Mejora rendimiento 3D */
+}
+
+/* Estilo y animación para el botón del chatbot */
+.chatbot-btn {
+  animation: pulseAnimation 2s infinite !important;
+  will-change: transform, box-shadow;
+}
+
+/* Animación adicional que se activará periódicamente */
+.chatbot-btn-attention {
+  animation: bounce 1.5s infinite !important;
+}
+
+/* Aumentar tamaño al pasar el cursor para mayor interactividad */
+.chatbot-btn:hover {
+  transform: scale(1.1) !important;
+  filter: brightness(110%);
+  cursor: pointer;
 }
 
 /* Clase para el contenedor de carga durante lazy loading */
