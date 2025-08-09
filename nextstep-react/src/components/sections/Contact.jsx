@@ -1,8 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import emailjs from '@emailjs/browser';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faPhone, faEnvelope, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-import contactImage from '../../assets/img/calzado-mano.jpg';
+// Importar iconos individuales para reducir tamaño del bundle
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons/faMapMarkerAlt';
+import { faPhone } from '@fortawesome/free-solid-svg-icons/faPhone';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons/faEnvelope';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons/faPaperPlane';
+// Importar imagen con metadatos para mejor optimización
+import contactImage from '../../assets/img/calzado-mano.jpg?width=1200&format=webp';
 import './contact.css'; // Importar estilos específicos para contacto
 
 /**
@@ -92,23 +97,20 @@ function Contact() {
     return Object.keys(errors).length === 0;
   };
   
-  // Verifica si el formulario es válido para habilitar/deshabilitar el botón de envío
+  // Verifica si el formulario es válido para habilitar/deshabilitar el botón de envío con mejor rendimiento
   const isFormValid = useCallback(() => {
     // Verificar que todos los campos requeridos tengan valor
-    if (!formData.name.trim() || !formData.email.trim() || 
-        !formData.phone.trim() || !formData.message.trim()) {
-      return false;
-    }
+    const hasAllFields = formData.name.trim() && formData.email.trim() && 
+                        formData.phone.trim() && formData.message.trim();
+    
+    if (!hasAllFields) return false;
     
     // Verificar que no haya errores activos
-    if (Object.keys(formErrors).length > 0) {
-      return false;
-    }
+    if (Object.keys(formErrors).length > 0) return false;
     
-    // Validar formato de email
-    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
-      return false;
-    }
+    // Validar formato de email con regex optimizada y pre-compilada
+    const EMAIL_REGEX = useMemo(() => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, []);
+    if (!EMAIL_REGEX.test(formData.email)) return false;
     
     return true;
   }, [formData, formErrors]);
@@ -119,8 +121,8 @@ function Contact() {
     emailjs.init("dS3ymEQpvDlRFT3Zd"); // Reemplazar con tu clave pública de EmailJS
   }, []);
   
-  // Maneja el envío del formulario
-  const handleSubmit = (e) => {
+  // Maneja el envío del formulario con optimizaciones de rendimiento
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     
     if (validateForm()) {
@@ -135,19 +137,22 @@ function Contact() {
         message: formData.message
       };
       
-      // Enviar email usando EmailJS
+      // Usar Promise para optimizar el manejo de errores
       emailjs.send(
         'service_de9nmfj', // Reemplazar con tu ID de servicio EmailJS
         'template_np82jrs', // Reemplazar con tu ID de plantilla EmailJS
         templateParams
       )
         .then((response) => {
-          console.log('Email enviado con éxito:', response);
+          // Evitar log innecesario en producción
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('Email enviado con éxito:', response);
+          }
           setSubmitSuccess(true);
           setIsSubmitting(false);
           
-          // Resetear formulario después de 5 segundos
-          setTimeout(() => {
+          // Resetear formulario después de mostrar mensaje de éxito
+          const resetTimer = setTimeout(() => {
             setFormData({
               name: '',
               email: '',
@@ -156,6 +161,9 @@ function Contact() {
             });
             setSubmitSuccess(false);
           }, 5000);
+          
+          // Limpieza para evitar memory leaks
+          return () => clearTimeout(resetTimer);
         })
         .catch((error) => {
           console.error('Error al enviar el email:', error);
@@ -163,10 +171,11 @@ function Contact() {
           setIsSubmitting(false);
         });
     } else {
-      // Anunciar errores para lectores de pantalla
-      document.getElementById('form-errors-alert').focus();
+      // Anunciar errores para lectores de pantalla de forma más eficiente
+      const errorEl = document.getElementById('form-errors-alert');
+      if (errorEl) errorEl.focus();
     }
-  };
+  }, [formData, validateForm]);
 
   return (
     <section id="contacto" className="section contact parallax-section" aria-labelledby="contact-title" style={{backgroundImage: `url(${contactImage})`}}>

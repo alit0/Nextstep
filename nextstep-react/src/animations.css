@@ -1,0 +1,36 @@
+/* Animaciones optimizadas para mejor rendimiento */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Clase para elementos que serán animados */
+.animated {
+  animation: fadeInUp 0.6s ease forwards;
+  will-change: opacity, transform; /* Ayuda al navegador a optimizar las animaciones */
+  backface-visibility: hidden; /* Mejora rendimiento en dispositivos móviles */
+  perspective: 1000px; /* Mejora rendimiento 3D */
+}
+
+/* Clase para el contenedor de carga durante lazy loading */
+.loading-container {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #555;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Optimizaciones para los componentes lazy-loaded */
+.section {
+  contain: content; /* Mejora el rendimiento aislando el contenido */
+}

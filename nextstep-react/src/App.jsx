@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './index.css';
+import './animations.css'; // Importar animaciones optimizadas
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarCheck, faComments, faRobot, faShoePrints, faWalking, faShieldAlt, faChild, faCalendarAlt, faHeart, faMapMarkerAlt, faPhone, faEnvelope, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-import { faInstagram, faFacebook, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+// Importar solo los iconos que se usan en este archivo principal
+import { faCalendarCheck } from '@fortawesome/free-solid-svg-icons/faCalendarCheck';
+import { faComments } from '@fortawesome/free-solid-svg-icons/faComments';
+import { faRobot } from '@fortawesome/free-solid-svg-icons/faRobot';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons/faPaperPlane';
 import NextstepLogo from './assets/Nextstep.svg';
 
 function Header() {
@@ -365,48 +369,99 @@ function Chatbot() {
   );
 }
 
+// Lazy load para componentes pesados
+const LazyAbout = lazy(() => import('./components/sections/About.jsx'));
+const LazyContact = lazy(() => import('./components/sections/Contact.jsx'));
+const LazyServices = lazy(() => import('./components/sections/Services.jsx'));
+const LazyGaitTypes = lazy(() => import('./components/sections/GaitTypes.jsx'));
+const LazyWhyChoose = lazy(() => import('./components/sections/WhyChoose.jsx'));
+
+// Componente de carga mientras los componentes lazy se cargan
+const LoadingFallback = () => <div className="loading-container">Cargando...</div>;
+
 function App() {
   useEffect(() => {
-    // Smooth scrolling for navigation links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
+    // Smooth scrolling con mejor performance usando requestAnimationFrame
+    const smoothScroll = (targetId) => {
+      const target = document.querySelector(targetId);
+      if (!target) return;
+      
+      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
+      const startPosition = window.pageYOffset;
+      const distance = targetPosition - startPosition;
+      const duration = 800; // ms
+      let startTime = null;
+      
+      function animation(currentTime) {
+        if (startTime === null) startTime = currentTime;
+        const timeElapsed = currentTime - startTime;
+        const progress = Math.min(timeElapsed / duration, 1);
+        const ease = t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // función de ease-in-out
+        
+        window.scrollTo(0, startPosition + distance * ease(progress));
+        
+        if (timeElapsed < duration) {
+          requestAnimationFrame(animation);
+        }
+      }
+      
+      requestAnimationFrame(animation);
+    };
+    
+    // Delegación de eventos para mejor performance
+    document.body.addEventListener('click', (e) => {
+      const anchor = e.target.closest('a[href^="#"]');
+      if (anchor) {
         e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-          behavior: 'smooth'
-        });
-      });
+        smoothScroll(anchor.getAttribute('href'));
+      }
     });
 
-    // Animation on scroll
+    // Animation on scroll optimizado
     const observerOptions = {
-      threshold: 0.1,
+      threshold: 0.15, // Mejor umbral
       rootMargin: '0px 0px -50px 0px'
     };
 
+    // Crear observador una sola vez
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+        if (entry.isIntersecting && !entry.target.classList.contains('animated')) {
+          // Usar clases CSS para animar en lugar de estilo inline
+          entry.target.classList.add('animated');
         }
       });
     }, observerOptions);
 
-    // Observe all cards for animation
-    document.querySelectorAll('.service-card, .gait-card, .feature-card, .contact-info').forEach(card => {
-      observer.observe(card);
-    });
-
+    // Observer con requestIdleCallback para mejor rendimiento
+    const elementsToObserve = document.querySelectorAll('.service-card, .gait-card, .feature-card, .contact-info');
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        elementsToObserve.forEach(card => observer.observe(card));
+      });
+    } else {
+      // Fallback para navegadores que no soportan requestIdleCallback
+      elementsToObserve.forEach(card => observer.observe(card));
+    }
+    
+    // Limpieza al desmontar
+    return () => {
+      elementsToObserve.forEach(element => observer.unobserve(element));
+      observer.disconnect();
+    };
   }, []);
 
   return (
     <div className="App">
       <Header />
       <Hero />
-      <About />
-      <Services />
-      <GaitTypes />
-      <WhyChoose />
-      <Contact />
+      <Suspense fallback={<LoadingFallback />}>
+        <LazyAbout />
+        <LazyServices />
+        <LazyGaitTypes />
+        <LazyWhyChoose />
+        <LazyContact />
+      </Suspense>
       <Chatbot />
     </div>
   );
