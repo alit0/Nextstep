@@ -1,0 +1,287 @@
+/* Nextstep React - Estilos para accesibilidad */
+
+/* Skip Link - Permite saltar al contenido principal */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #26d0ce;
+  color: white;
+  padding: 8px 16px;
+  z-index: 1001;
+  transition: top 0.3s ease;
+  border-radius: 0 0 4px 0;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Utilidad para contenido solo accesible a lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+  color: transparent;
+}
+
+.sr-only:focus,
+.sr-only:active {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Estilos para estado de foco visible */
+:focus {
+  outline: 3px solid #26d0ce;
+  outline-offset: 2px;
+}
+
+/* Estilos para enfatizar campo obligatorio */
+.form-label .required {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-left: 3px;
+}
+
+/* Estilos para indicadores de error en formularios */
+.error-message {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 5px;
+  background-color: rgba(231, 76, 60, 0.1);
+  padding: 5px 10px;
+  border-radius: 4px;
+  border-left: 3px solid #e74c3c;
+}
+
+input.error,
+textarea.error {
+  border-color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.05);
+}
+
+/* Estilos para mensajes de éxito */
+.success-message {
+  color: #27ae60;
+  background-color: rgba(39, 174, 96, 0.1);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border-left: 3px solid #27ae60;
+}
+
+/* Estilos para tabIndex y elementos enfocables */
+[tabindex="0"]:focus,
+button:focus,
+input:focus,
+textarea:focus,
+select:focus,
+a:focus {
+  outline: 3px solid #26d0ce;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(38, 208, 206, 0.4);
+}
+
+/* Mejoras de contraste de color */
+.section-title,
+.section-subtitle {
+  color: #222;
+}
+
+.why-choose .section-title,
+.why-choose .section-subtitle,
+.contact .section-title,
+.contact .section-subtitle {
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos para componentes interactivos */
+.chatbot-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: #26d0ce;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+
+.chatbot-btn:hover,
+.chatbot-btn:focus {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.chatbot-btn svg {
+  font-size: 1.8rem;
+}
+
+/* Chatbot contenedor */
+.chatbot-container {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 350px;
+  height: 450px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chatbot header */
+.chatbot-header {
+  padding: 15px;
+  background: #26d0ce;
+  color: white;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  align-items: center;
+}
+
+.chatbot-header h3 {
+  margin-left: 15px;
+  flex-grow: 1;
+}
+
+.chatbot-header .close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Chatbot messages */
+.chatbot-messages {
+  flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Estilos de mensajes */
+.chat-message {
+  padding: 10px 15px;
+  border-radius: 18px;
+  max-width: 80%;
+  word-break: break-word;
+}
+
+.chat-message.user {
+  background: #e6f7f7;
+  align-self: flex-end;
+  border-bottom-right-radius: 5px;
+}
+
+.chat-message.bot {
+  background: #f2f2f2;
+  align-self: flex-start;
+  border-bottom-left-radius: 5px;
+}
+
+/* Animación de escritura */
+.typing span.dot {
+  display: inline-block;
+  animation: typing 1.4s infinite;
+}
+
+.typing span.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing span.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0% { opacity: 0.3; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-2px); }
+  100% { opacity: 0.3; transform: translateY(0); }
+}
+
+/* Chatbot input */
+.chatbot-input {
+  padding: 10px;
+  border-top: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.chatbot-input input {
+  flex-grow: 1;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 8px 15px;
+  font-size: 14px;
+}
+
+.chatbot-input button {
+  background: #26d0ce;
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.chatbot-input button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Responsive Mejoras */
+@media (max-width: 768px) {
+  .chatbot-container {
+    width: 90%;
+    right: 5%;
+    left: 5%;
+    bottom: 80px;
+  }
+}
+
+/* Estilos para etiquetas semánticas */
+main {
+  margin-top: 80px; /* Para compensar el header fijo */
+}
+
+/* Animación para elementos cargados */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
