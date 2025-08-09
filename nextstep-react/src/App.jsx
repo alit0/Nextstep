@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './index.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarCheck, faComments, faRobot, faShoePrints, faWalking, faShieldAlt, faChild, faCalendarAlt, faHeart, faMapMarkerAlt, faPhone, faEnvelope, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faInstagram, faFacebook, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import NextstepLogo from './assets/Nextstep.svg';
 
 function Header() {
   const [isNavActive, setIsNavActive] = useState(false);
@@ -28,7 +32,7 @@ function Header() {
     <header className={`header ${isHeaderScrolled ? 'scrolled' : ''}`}>
       <nav className="nav">
         <div className="logo">
-          NEXT <span className="step">STEP</span>
+          <img src={NextstepLogo} className="logo" alt="Nextstep logo" />
         </div>
         <div className={`nav-content ${isNavActive ? 'active' : ''}`}>
           <ul className="nav-links">
@@ -39,27 +43,16 @@ function Header() {
             <li><a href="#contacto" onClick={toggleMobileMenu}>Contacto</a></li>
             <div className="mobile-social">
               <a href="https://www.instagram.com/nextsteep" target="_blank" rel="noopener" title="Instagram">
-                <i className="fab fa-instagram"></i>
+                <FontAwesomeIcon icon={faInstagram} />
               </a>
               <a href="https://www.facebook.com/profile.php?id=61564477432169" target="_blank" rel="noopener" title="Facebook">
-                <i className="fab fa-facebook"></i>
+                <FontAwesomeIcon icon={faFacebook} />
               </a>
               <a href="https://wa.me/541124011312" target="_blank" rel="noopener" title="WhatsApp">
-                <i className="fab fa-whatsapp"></i>
+                <FontAwesomeIcon icon={faWhatsapp} />
               </a>
             </div>
           </ul>
-          <div className="nav-social">
-            <a href="https://www.instagram.com/nextsteep" target="_blank" rel="noopener" title="Instagram">
-              <i className="fab fa-instagram"></i>
-            </a>
-            <a href="https://www.facebook.com/profile.php?id=61564477432169" target="_blank" rel="noopener" title="Facebook">
-              <i className="fab fa-facebook"></i>
-            </a>
-            <a href="https://wa.me/541124011312" target="_blank" rel="noopener" title="WhatsApp">
-              <i className="fab fa-whatsapp"></i>
-            </a>
-          </div>
         </div>
         <div className={`mobile-menu ${isNavActive ? 'active' : ''}`} onClick={toggleMobileMenu}>
           <span></span>
@@ -78,7 +71,7 @@ function Hero() {
         <h1>Plantillas Digitalizadas a Medida</h1>
         <p>Cuidamos la salud de tus músculos y articulaciones con tecnología de última generación para evaluar la biomecánica de tu pie</p>
         <a href="#contacto" className="cta-button">
-          <i className="fas fa-calendar-check"></i> Agenda tu Evaluación Gratuita
+          <FontAwesomeIcon icon={faCalendarCheck} /> Agenda tu Evaluación Gratuita
         </a>
       </div>
     </section>
@@ -127,7 +120,7 @@ function Services() {
         <div className="services-grid">
           <div className="service-card">
             <div className="service-icon">
-              <i className="fas fa-foot-print"></i>
+              <FontAwesomeIcon icon={faShoePrints} />
             </div>
             <h4>Baropodometría Digital</h4>
             <p>Escaneamos tu pisada con tecnología digital para obtener un diagnóstico visual y preciso de los diferentes puntos de apoyo del pie.</p>
@@ -135,7 +128,7 @@ function Services() {
           
           <div className="service-card">
             <div className="service-icon">
-              <i className="fas fa-shoe-prints"></i>
+              <FontAwesomeIcon icon={faShoePrints} />
             </div>
             <h4>Plantillas Personalizadas</h4>
             <p>Diseñadas 100% a medida con goma eva y resina termo-moldeable que se adapta perfectamente a tus pies.</p>
@@ -143,7 +136,7 @@ function Services() {
           
           <div className="service-card">
             <div className="service-icon">
-              <i className="fas fa-walking"></i>
+              <FontAwesomeIcon icon={faWalking} />
             </div>
             <h4>Estudio Digital de Marcha</h4>
             <p>Análisis completo de datos estáticos y dinámicos de tus pisadas, ideal para deportistas y uso diario.</p>
@@ -191,25 +184,25 @@ function WhyChoose() {
         
         <div className="features-grid">
           <div className="feature-card">
-            <i className="fas fa-shield-alt"></i>
+            <FontAwesomeIcon icon={faShieldAlt} size="3x" />
             <h4>Garantía de 15 Días</h4>
             <p>Período de prueba completo con ajustes sin cargo adicional</p>
           </div>
           
           <div className="feature-card">
-            <i className="fas fa-child"></i>
+            <FontAwesomeIcon icon={faChild} size="3x" />
             <h4>Para Toda la Familia</h4>
             <p>Atendemos adultos y niños desde los 4 años de edad</p>
           </div>
           
           <div className="feature-card">
-            <i className="fas fa-calendar-alt"></i>
+            <FontAwesomeIcon icon={faCalendarAlt} size="3x" />
             <h4>Durabilidad Garantizada</h4>
             <p>Nuestras plantillas duran hasta 1 año completo</p>
           </div>
           
           <div className="feature-card">
-            <i className="fas fa-heart"></i>
+            <FontAwesomeIcon icon={faHeart} size="3x" />
             <h4>Prevención de Lesiones</h4>
             <p>Reduce compensaciones y alivia dolencias articulares y musculares</p>
           </div>
@@ -228,7 +221,7 @@ function Contact() {
           <h3>¡EVALUACIÓN GRATUITA por Tiempo Limitado!</h3>
           <p><strong>Ahorra $15.000</strong> en tu consulta inicial. Descubre qué está causando tus dolores y cómo las plantillas personalizadas pueden cambiar tu vida.</p>
           <a href="https://wa.me/541124011312?text=¡Hola!%20Quiero%20agendar%20mi%20evaluación%20GRATUITA%20de%20pisada.%20¿Cuándo%20tienen%20disponibilidad?" target="_blank" className="mega-button">
-            <i className="fab fa-whatsapp"></i> AGENDAR AHORA GRATIS
+            <FontAwesomeIcon icon={faWhatsapp} /> AGENDAR AHORA GRATIS
           </a>
           <div className="urgency-text">⏰ Solo quedan pocas fechas disponibles este mes</div>
         </div>
@@ -238,19 +231,19 @@ function Contact() {
         
         <div className="contact-grid">
           <div className="contact-info">
-            <i className="fas fa-map-marker-alt"></i>
+            <FontAwesomeIcon icon={faMapMarkerAlt} />
             <h4>Dirección</h4>
             <p>Tapia de Cruz 1382 Local N°4<br/>Belén de Escobar, Buenos Aires</p>
           </div>
           
           <div className="contact-info">
-            <i className="fas fa-phone"></i>
+            <FontAwesomeIcon icon={faPhone} />
             <h4>WhatsApp</h4>
             <p>+54 11 2401-1312</p>
           </div>
           
           <div className="contact-info">
-            <i className="fas fa-envelope"></i>
+            <FontAwesomeIcon icon={faEnvelope} />
             <h4>Email</h4>
             <p>plantillasnextstep@gmail.com</p>
           </div>
@@ -258,13 +251,13 @@ function Contact() {
         
         <div className="social-links">
           <a href="https://www.instagram.com/nextsteep" target="_blank" rel="noopener" title="Instagram">
-            <i className="fab fa-instagram"></i>
+            <FontAwesomeIcon icon={faInstagram} />
           </a>
           <a href="https://www.facebook.com/profile.php?id=61564477432169" target="_blank" rel="noopener" title="Facebook">
-            <i className="fab fa-facebook"></i>
+            <FontAwesomeIcon icon={faFacebook} />
           </a>
           <a href="https://wa.me/541124011312" target="_blank" rel="noopener" title="WhatsApp">
-            <i className="fab fa-whatsapp"></i>
+            <FontAwesomeIcon icon={faWhatsapp} />
           </a>
         </div>
       </div>
@@ -327,12 +320,12 @@ function Chatbot() {
   return (
     <>
       <div className="chatbot-btn" onClick={toggleChatbot}>
-        <i className="fas fa-comments"></i>
+        <FontAwesomeIcon icon={faComments} />
       </div>
       
       <div className="chatbot-window" id="chatbot-window" style={{ display: chatbotOpen ? 'flex' : 'none' }}>
         <div className="chatbot-header">
-          <h4><i className="fas fa-robot"></i> Asistente Next Step</h4>
+          <h4><FontAwesomeIcon icon={faRobot} /> Asistente Next Step</h4>
           <button className="close-chat" onClick={toggleChatbot}>&times;</button>
         </div>
         <div className="chatbot-messages" id="chatbot-messages">
@@ -364,7 +357,7 @@ function Chatbot() {
             onKeyPress={handleKeyPress}
           />
           <button className="send-btn" onClick={() => handleSendMessage(inputMessage)} disabled={!inputMessage.trim()}>
-            <i className="fas fa-paper-plane"></i>
+            <FontAwesomeIcon icon={faPaperPlane} />
           </button>
         </div>
       </div>
