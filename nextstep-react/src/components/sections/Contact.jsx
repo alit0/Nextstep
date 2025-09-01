@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
-import emailjs from '@emailjs/browser';
+import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // Importar iconos individuales para reducir tamaño del bundle
 import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons/faMapMarkerAlt';
 import { faPhone } from '@fortawesome/free-solid-svg-icons/faPhone';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons/faEnvelope';
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons/faPaperPlane';
 // Importar imagen con metadatos para mejor optimización
 import contactImage from '../../assets/img/calzado-mano.jpg?width=1200&format=webp';
 import './contact.css'; // Importar estilos específicos para contacto
@@ -15,167 +13,6 @@ import './contact.css'; // Importar estilos específicos para contacto
  * Implementa validación y feedback para mejor experiencia de usuario
  */
 function Contact() {
-  // Estado para manejar el formulario
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: ''
-  });
-
-  // Constantes para validación
-  const MAX_MESSAGE_LENGTH = 500; // Límite de caracteres para el mensaje
-  
-  // Estado para manejar errores de validación
-  const [formErrors, setFormErrors] = useState({});
-  
-  // Estado para mensaje de éxito
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  
-  // Estado para manejar proceso de envío
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Estado para error de envío
-  const [submitError, setSubmitError] = useState('');
-
-  // Maneja los cambios en los campos del formulario
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    // Aplicar restricciones según el campo
-    let processedValue = value;
-    
-    if (name === 'phone') {
-      // Solo permitir números y caracteres de formato (+, -, espacio, paréntesis)
-      processedValue = value.replace(/[^0-9+\-\s()]/g, '');
-    } else if (name === 'message' && value.length > MAX_MESSAGE_LENGTH) {
-      // Limitar longitud del mensaje
-      processedValue = value.substring(0, MAX_MESSAGE_LENGTH);
-    }
-    
-    setFormData({
-      ...formData,
-      [name]: processedValue
-    });
-    
-    // Eliminar error cuando el usuario comienza a corregir
-    if (formErrors[name]) {
-      setFormErrors({
-        ...formErrors,
-        [name]: ''
-      });
-    }
-  };
-
-  // Valida el formulario antes de enviarlo
-  const validateForm = () => {
-    const errors = {};
-    
-    if (!formData.name.trim()) {
-      errors.name = 'El nombre es obligatorio';
-    }
-    
-    if (!formData.email.trim()) {
-      errors.email = 'El email es obligatorio';
-    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
-      errors.email = 'El email no es válido';
-    }
-    
-    if (!formData.phone.trim()) {
-      errors.phone = 'El teléfono es obligatorio';
-    } else if (!/^[0-9+\-\s()]+$/.test(formData.phone)) {
-      errors.phone = 'El teléfono solo debe contener números y símbolos válidos';
-    }
-    
-    if (!formData.message.trim()) {
-      errors.message = 'El mensaje es obligatorio';
-    } else if (formData.message.length > MAX_MESSAGE_LENGTH) {
-      errors.message = `El mensaje no debe exceder ${MAX_MESSAGE_LENGTH} caracteres`;
-    }
-    
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-  
-  // Verifica si el formulario es válido para habilitar/deshabilitar el botón de envío con mejor rendimiento
-  const isFormValid = useCallback(() => {
-    // Verificar que todos los campos requeridos tengan valor
-    const hasAllFields = formData.name.trim() && formData.email.trim() && 
-                        formData.phone.trim() && formData.message.trim();
-    
-    if (!hasAllFields) return false;
-    
-    // Verificar que no haya errores activos
-    if (Object.keys(formErrors).length > 0) return false;
-    
-    // Validar formato de email con regex optimizada y pre-compilada
-    const EMAIL_REGEX = useMemo(() => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, []);
-    if (!EMAIL_REGEX.test(formData.email)) return false;
-    
-    return true;
-  }, [formData, formErrors]);
-
-  // Inicializar EmailJS
-  useEffect(() => {
-    // Inicialización de EmailJS - Estos son valores de ejemplo, tendrás que reemplazarlos con tus propias credenciales
-    emailjs.init("dS3ymEQpvDlRFT3Zd"); // Reemplazar con tu clave pública de EmailJS
-  }, []);
-  
-  // Maneja el envío del formulario con optimizaciones de rendimiento
-  const handleSubmit = useCallback((e) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      setIsSubmitting(true);
-      setSubmitError('');
-      
-      // Preparar plantilla de parámetros para EmailJS
-      const templateParams = {
-        from_name: formData.name,
-        reply_to: formData.email,
-        phone: formData.phone,
-        message: formData.message
-      };
-      
-      // Usar Promise para optimizar el manejo de errores
-      emailjs.send(
-        'service_de9nmfj', // Reemplazar con tu ID de servicio EmailJS
-        'template_np82jrs', // Reemplazar con tu ID de plantilla EmailJS
-        templateParams
-      )
-        .then((response) => {
-          // Evitar log innecesario en producción
-          if (process.env.NODE_ENV !== 'production') {
-            console.log('Email enviado con éxito:', response);
-          }
-          setSubmitSuccess(true);
-          setIsSubmitting(false);
-          
-          // Resetear formulario después de mostrar mensaje de éxito
-          const resetTimer = setTimeout(() => {
-            setFormData({
-              name: '',
-              email: '',
-              phone: '',
-              message: ''
-            });
-            setSubmitSuccess(false);
-          }, 5000);
-          
-          // Limpieza para evitar memory leaks
-          return () => clearTimeout(resetTimer);
-        })
-        .catch((error) => {
-          console.error('Error al enviar el email:', error);
-          setSubmitError('Hubo un problema al enviar el mensaje. Por favor, intenta nuevamente.');
-          setIsSubmitting(false);
-        });
-    } else {
-      // Anunciar errores para lectores de pantalla de forma más eficiente
-      const errorEl = document.getElementById('form-errors-alert');
-      if (errorEl) errorEl.focus();
-    }
-  }, [formData, validateForm]);
 
   return (
     <section id="contacto" className="section contact parallax-section" aria-labelledby="contact-title" style={{backgroundImage: `url(${contactImage})`}}>
@@ -194,7 +31,11 @@ function Contact() {
                 </div>
                 <div className="contact-text">
                   <strong>Ubicación:</strong>
-                  <a href="https://www.google.com/maps/place/Av.+Eugenia+Tapia+de+Cruz+1382+Local+N%C2%B04,+B1625+Bel%C3%A9n+de+Escobar,+Provincia+de+Buenos+Aires/@-34.3524302,-58.8025634,17z/data=!3m1!4b1!4m5!3m4!1s0x95bb61b94cd3bfed:0x4b53f873cf8fa6c5!8m2!3d-34.3524347!4d-58.7999885?entry=ttu&g_ep=EgoyMDI1MDgwNi4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer"><address>Tapia de Cruz 1382 Local N°4, Belén de Escobar, Buenos Aires.</address></a>
+                  <a href="https://www.google.com/maps/place/Kinedep/@-34.3514327,-58.8018714,17z/data=!4m15!1m8!3m7!1s0x95bb61bbe3f9ee8b:0xbb5d68b0bcf79b15!2sAlberdi+608,+B1625GWN+Bel%C3%A9n+de+Escobar,+Provincia+de+Buenos+Aires!3b1!8m2!3d-34.3514372!4d-58.7992965!16s%2Fg%2F11l_4lnjl6!3m5!1s0x95bb610039989dc1:0x56278c146b1bcc81!8m2!3d-34.3514372!4d-58.7992965!16s%2Fg%2F11w_zl0p0y?entry=ttu&g_ep=EgoyMDI1MDgyNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer"><address>Alberdi 608, Belén de Escobar, Buenos Aires</address></a>
+                  <a href="https://www.google.com/maps/place/Chingolo+480,+B1624+CHQ,+Provincia+de+Buenos+Aires/@-34.4293693,-58.5967327,17z/data=!3m1!4b1!4m6!3m5!1s0x95bca5ae0833eeb9:0xa8f220d623bc1ac1!8m2!3d-34.4293738!4d-58.5941578!16s%2Fg%2F11j2p91c6z?entry=ttu&g_ep=EgoyMDI1MDgyNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer"><address>Chingolo 480, Tigre, Buenos Aires</address></a>
+                  <a href="https://www.google.com/maps/place/Complejo+VOHE/@-34.4354686,-58.8320217,17z/data=!4m15!1m8!3m7!1s0x95bc9c27fdb5d489:0x2b45803c4238d710!2sR.+Caama%C3%B1o+1370,+B1631BVB+La+Lonja,+Provincia+de+Buenos+Aires!3b1!8m2!3d-34.4354731!4d-58.8294468!16s%2Fg%2F11sxx52ssk!3m5!1s0x95bc9c27f989ebe1:0x5e43d230bf31e42!8m2!3d-34.4355932!4d-58.8292178!16s%2Fg%2F11bz0x5mhg?entry=ttu&g_ep=EgoyMDI1MDgyNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer"><address>R. Caamaño 1370, Pilar, Buenos Aires</address></a>
+                  <a href="https://www.google.com/maps/place/Virrey+del+Pino+2428,+C1426+EGQ,+Cdad.+Aut%C3%B3noma+de+Buenos+Aires/@-34.566289,-58.4577957,17z/data=!3m1!4b1!4m6!3m5!1s0x95bcb5d0381639cd:0x29bbe39288e03962!8m2!3d-34.5662935!4d-58.4529248!16s%2Fg%2F11xd4nknmp?entry=ttu&g_ep=EgoyMDI1MDgyNS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer"><address>Virrey del pino 2428, Belgrano, CABA</address></a>
+
                 </div>
               </div>
               
@@ -204,7 +45,7 @@ function Contact() {
                 </div>
                 <div className="contact-text">
                   <strong>Teléfono:</strong>
-                  <a href="tel:+541124011312" aria-label="Llamar al teléfono +54 11 24011312">+54 11 24011312</a>
+                  <a href="tel:+541140898343" aria-label="Llamar al teléfono +54 11 40898343">+54 11 40898343</a>
                 </div>
               </div>                      
               
@@ -214,14 +55,14 @@ function Contact() {
                 </div>
                 <div className="contact-text">
                   <strong>Email:</strong>
-                  <a href="mailto:contacto@nextstep.com.ar" aria-label="Enviar email a contacto@nextstep.com.ar">contacto@nextstep.com.ar</a>
+                  <a href="mailto:plantillasnextstep@gmail.com" aria-label="Enviar email a plantillasnextstep@gmail.com">plantillasnextstep@gmail.com</a>
                 </div>
               </div>
             </div>
           </div>
           
           {/* Formulario de contacto */}
-          <div className="contact-form-container">
+{/*           <div className="contact-form-container">
             <form className="contact-form" onSubmit={handleSubmit} noValidate>
               <div 
                 id="form-errors-alert" 
@@ -349,15 +190,15 @@ function Contact() {
               
               <button 
                 type="submit" 
-                className={`submit-button ${isSubmitting || !isFormValid() ? 'disabled' : ''}`}
-                disabled={isSubmitting || !isFormValid()}
-                title={isFormValid() ? 'Enviar mensaje' : 'Complete todos los campos correctamente para enviar'}
+                className={`submit-button ${isSubmitting || !isFormValid ? 'disabled' : ''}`}
+                disabled={isSubmitting || !isFormValid}
+                title={isFormValid ? 'Enviar mensaje' : 'Complete todos los campos correctamente para enviar'}
               >
                 <FontAwesomeIcon icon={faPaperPlane} aria-hidden="true" /> 
                 {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
               </button>
             </form>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

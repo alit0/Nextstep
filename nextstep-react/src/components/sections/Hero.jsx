@@ -44,14 +44,14 @@ function Hero() {
             goToContact(); 
           }}
           onKeyDown={(e) => handleKeyboardAction(e, goToContact)}
-          aria-label="Agenda tu evaluación gratuita y personalizada"
+          aria-label="Agenda tu evaluación personalizada"
           role="button"
         >
           <FontAwesomeIcon 
             icon={faCalendarCheck} 
             aria-hidden="true" 
           /> 
-          <span>Agenda tu Evaluación Gratuita</span>
+          <span>Agenda tu Evaluación</span>
         </a>
       </div>
     </section>

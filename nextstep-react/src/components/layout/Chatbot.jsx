@@ -62,7 +62,7 @@ function Chatbot() {
     
     // Respuesta predeterminada si no se encuentra coincidencia
     if (!response) {
-      response = 'Gracias por tu mensaje. Para una atención más personalizada, te recomendamos contactarnos directamente por teléfono al 1124011312 o completar el formulario de contacto.';
+      response = 'Gracias por tu mensaje. Para una atención más personalizada, te recomendamos contactarnos directamente por teléfono al 1140898343 o completar el formulario de contacto.';
     }
     
     return response;

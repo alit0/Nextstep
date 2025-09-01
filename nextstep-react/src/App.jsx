@@ -7,6 +7,18 @@ import { faCalendarCheck } from '@fortawesome/free-solid-svg-icons/faCalendarChe
 import { faComments } from '@fortawesome/free-solid-svg-icons/faComments';
 import { faRobot } from '@fortawesome/free-solid-svg-icons/faRobot';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons/faPaperPlane';
+import { faInstagram } from '@fortawesome/free-brands-svg-icons/faInstagram';
+import { faFacebook } from '@fortawesome/free-brands-svg-icons/faFacebook';
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons/faWhatsapp';
+import { faShoePrints } from '@fortawesome/free-solid-svg-icons/faShoePrints';
+import { faWalking } from '@fortawesome/free-solid-svg-icons/faWalking';
+import { faShieldAlt } from '@fortawesome/free-solid-svg-icons/faShieldAlt';
+import { faChild } from '@fortawesome/free-solid-svg-icons/faChild';
+import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons/faCalendarAlt';
+import { faHeart } from '@fortawesome/free-solid-svg-icons/faHeart';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons/faMapMarkerAlt';
+import { faPhone } from '@fortawesome/free-solid-svg-icons/faPhone';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons/faEnvelope';
 import NextstepLogo from './assets/Nextstep.svg';
 
 function Header() {
@@ -29,7 +41,7 @@ function Header() {
       }
       
       // Obtener todos los elementos de sección
-      const inicio = document.getElementById('inicio');
+      // No usamos 'inicio' directamente, pero lo mantenemos consistente en la detección
       const nosotros = document.getElementById('nosotros');
       const servicios = document.getElementById('servicios');
       const pisada = document.getElementById('pisada');
@@ -106,7 +118,7 @@ function Hero() {
         <h1>Plantillas Digitalizadas a Medida</h1>
         <p>Cuidamos la salud de tus músculos y articulaciones con tecnología de última generación para evaluar la biomecánica de tu pie</p>
         <a href="#contacto" className="cta-button">
-          <FontAwesomeIcon icon={faCalendarCheck} /> Agenda tu Evaluación Gratuita
+          <FontAwesomeIcon icon={faCalendarCheck} /> Agenda tu Evaluación
         </a>
       </div>
     </section>
