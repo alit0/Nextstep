@@ -1,0 +1,38 @@
+/* Permission button styles */
+.chatbot__permission-button {
+    background: #ff5722;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    animation: pulse 1.5s infinite;
+}
+
+.chatbot__permission-button:hover {
+    background: #e64a19;
+    transform: scale(1.05);
+}
+
+.permission-text {
+    display: inline-block;
+    margin-left: 5px;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.6);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 87, 34, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 87, 34, 0);
+    }
+}

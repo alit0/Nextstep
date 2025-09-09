@@ -468,11 +468,13 @@
   position: fixed;
   bottom: 90px;
   right: 20px;
-  width: 350px;
-  height: 450px;
+  width: 100%;
+  max-width: 450px;
+  height: 50%;
+  max-height: 450px;
   background: white;
   border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(63, 58, 58, 0.2);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -526,7 +528,7 @@
 .chat-message {
   padding: 10px 15px;
   border-radius: 18px;
-  max-width: 80%;
+  max-width: 100%;
   word-break: break-word;
 }
 
@@ -554,7 +556,7 @@
   border: 1px solid #ddd;
   border-radius: 20px;
   padding: 8px 15px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .chatbot-input button {
