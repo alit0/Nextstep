@@ -148,16 +148,7 @@ function App() {
             <div className="footer-info">
               <p>&copy; {new Date().getFullYear()} Next Step - Plantillas Digitalizadas a Medida</p>
               <p>
-                <a 
-                  href="#" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowPrivacyPage(true);
-                  }}
-                  className="footer-link"
-                >
-                  Política de Privacidad
-                </a>
+                <a href="/politicas" className="footer-link">Política de Privacidad</a>
               </p>
             </div>
             <div className="footer-social">
