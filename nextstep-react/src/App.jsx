@@ -1,6 +1,9 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './animations.css';
 import './index.css';
+import './components/sections/privacy-policy.css';
+import './components/layout/footer.css';
+import './components/sections/privacy-navigation.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // Importar solo los iconos que se usan en este archivo principal
 import { faCalendarCheck } from '@fortawesome/free-solid-svg-icons/faCalendarCheck';
@@ -447,11 +450,49 @@ const LazyContact = lazy(() => import('./components/sections/Contact.jsx'));
 const LazyServices = lazy(() => import('./components/sections/Services.jsx'));
 const LazyGaitTypes = lazy(() => import('./components/sections/GaitTypes.jsx'));
 const LazyWhyChoose = lazy(() => import('./components/sections/WhyChoose.jsx'));
+const LazyPrivacyPolicy = lazy(() => import('./components/sections/PrivacyPolicy.jsx'));
 
 // Componente de carga mientras los componentes lazy se cargan
 const LoadingFallback = () => <div className="loading-container">Cargando...</div>;
 
+// Componente Footer con enlaces legales
+function Footer({ showPrivacyPage }) {
+  return (
+    <footer className="footer">
+      <div className="container">
+        <div className="footer-content">
+          <div className="footer-logo">
+            <img src={NextstepLogo} alt="Nextstep Logo" />
+          </div>
+          <div className="footer-info">
+            <p>&copy; {new Date().getFullYear()} Next Step - Plantillas Digitalizadas a Medida</p>
+            <p>
+              <a href="#" onClick={(e) => {
+                e.preventDefault();
+                showPrivacyPage();
+              }} className="footer-link">Política de Privacidad</a>
+            </p>
+          </div>
+          <div className="footer-social">
+            <a href="https://www.instagram.com/nextsteep" target="_blank" rel="noopener noreferrer" aria-label="Síguenos en Instagram">
+              <FontAwesomeIcon icon={faInstagram} />
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61564477432169" target="_blank" rel="noopener noreferrer" aria-label="Visítanos en Facebook">
+              <FontAwesomeIcon icon={faFacebook} />
+            </a>
+            <a href="https://wa.me/541124011312" target="_blank" rel="noopener noreferrer" aria-label="Contáctanos por WhatsApp">
+              <FontAwesomeIcon icon={faWhatsapp} />
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
 function App() {
+  const [showPrivacyPage, setShowPrivacyPage] = useState(false);
+  
   useEffect(() => {
     // Smooth scrolling con mejor performance usando requestAnimationFrame
     const smoothScroll = (targetId) => {
@@ -525,16 +566,37 @@ function App() {
 
   return (
     <div className="App">
-      <Header />
-      <Hero />
-      <Suspense fallback={<LoadingFallback />}>
-        <LazyAbout />
-        <LazyServices />
-        <LazyGaitTypes />
-        <LazyWhyChoose />
-        <LazyContact />
-      </Suspense>
-      <Chatbot />
+      {!showPrivacyPage ? (
+        <>
+          <Header />
+          <Hero />
+          <Suspense fallback={<LoadingFallback />}>
+            <LazyAbout />
+            <LazyServices />
+            <LazyGaitTypes />
+            <LazyWhyChoose />
+            <LazyContact />
+          </Suspense>
+          <Chatbot />
+          <Footer showPrivacyPage={() => setShowPrivacyPage(true)} />
+        </>
+      ) : (
+        <>
+          <div className="privacy-page-container">
+            <div className="privacy-header">
+              <button onClick={() => setShowPrivacyPage(false)} className="back-button">
+                &larr; Volver al inicio
+              </button>
+            </div>
+            <LazyPrivacyPolicy />
+            <div className="privacy-footer-nav">
+              <button onClick={() => setShowPrivacyPage(false)} className="back-button">
+                &larr; Volver al inicio
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

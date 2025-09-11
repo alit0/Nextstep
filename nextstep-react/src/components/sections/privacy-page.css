@@ -1,0 +1,53 @@
+.privacy-page {
+  min-height: 100vh;
+  padding-top: 20px;
+  background-color: #f8f9fa;
+}
+
+.privacy-header {
+  display: flex;
+  justify-content: flex-start;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 15px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #3a7bc8;
+}
+
+.back-button svg {
+  margin-right: 8px;
+}
+
+.privacy-footer-nav {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+  .privacy-header {
+    padding: 15px;
+  }
+  
+  .back-button {
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+}

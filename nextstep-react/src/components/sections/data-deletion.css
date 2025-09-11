@@ -1,0 +1,90 @@
+.data-deletion {
+  padding: 100px 0 60px;
+  background-color: #f8f9fa;
+}
+
+.deletion-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.deletion-icon {
+  margin-right: 10px;
+  color: #e74c3c;
+}
+
+.deletion-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.deletion-section:last-child {
+  border-bottom: none;
+}
+
+.deletion-section h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.deletion-section h4 {
+  color: #555;
+  margin: 1.5rem 0 1rem;
+  font-size: 1.2rem;
+}
+
+.deletion-section ul {
+  padding-left: 20px;
+  margin-bottom: 1rem;
+}
+
+.deletion-section li {
+  margin-bottom: 0.5rem;
+}
+
+.deletion-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  color: #666;
+}
+
+.deletion-footer p {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .data-deletion {
+    padding: 80px 0 40px;
+  }
+  
+  .deletion-content {
+    padding: 1.5rem;
+    margin: 0 15px;
+  }
+  
+  .deletion-section h3 {
+    font-size: 1.3rem;
+  }
+  
+  .deletion-section h4 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Estilo para links dentro de las instrucciones */
+.deletion-section a, .deletion-footer a {
+  color: #4a90e2;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.deletion-section a:hover, .deletion-footer a:hover {
+  color: #2a6fc9;
+}

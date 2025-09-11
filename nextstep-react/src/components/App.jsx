@@ -1,7 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import '../index.css';
 import '../accessibility.css';
 import '../fixes.css';
+import '../components/sections/privacy-policy.css';
+import '../components/sections/privacy-navigation.css';
+import '../components/sections/data-deletion.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faFacebook, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import NextstepLogo from '../assets/Nextstep.svg';
@@ -18,11 +21,21 @@ import GaitTypes from './sections/GaitTypes';
 import WhyChoose from './sections/WhyChoose';
 import Contact from './sections/Contact';
 
+// Importación de páginas legales
+const PrivacyPolicy = lazy(() => import('./sections/PrivacyPolicy'));
+const DataDeletionInstructions = lazy(() => import('./sections/DataDeletionInstructions'));
+
+// Componente para el fallback de carga
+const LoadingFallback = () => <div className="loading-container">Cargando...</div>;
+
 /**
  * Componente principal de la aplicación
  * Integra todos los componentes siguiendo una estructura organizada y accesible
  */
 function App() {
+  // Estados para controlar la visibilidad de páginas legales
+  const [showPrivacyPage, setShowPrivacyPage] = useState(false);
+  const [showDeletionPage, setShowDeletionPage] = useState(false);
   // Efecto para manejar el cambio de secciones en el hash de URL
   useEffect(() => {
     // Función para manejar cambios de hash en URL
@@ -54,21 +67,77 @@ function App() {
 
   return (
     <>
-      {/* Estructura principal con skip links para accesibilidad */}
-      <a href="#main-content" className="skip-link">
-        Saltar al contenido principal
-      </a>
-      
-      <Header />
-      
-      <main id="main-content">
-        <Hero />
-        <About />
-        <Services />
-        <GaitTypes />
-        <WhyChoose />
-        <Contact />
-      </main>
+      {!showPrivacyPage && !showDeletionPage ? (
+        // Vista principal de la aplicación
+        <>
+          {/* Skip link para accesibilidad */}
+          <a href="#main-content" className="skip-link">
+            Saltar al contenido principal
+          </a>
+          
+          <Header />
+          
+          <main id="main-content">
+            <Hero />
+            <About />
+            <Services />
+            <GaitTypes />
+            <WhyChoose />
+            <Contact />
+          </main>
+        </>
+      ) : showPrivacyPage ? (
+        // Vista de políticas de privacidad
+        <div className="privacy-page-container">
+          <div className="privacy-header">
+            <button onClick={() => setShowPrivacyPage(false)} className="back-button">
+              &larr; Volver al inicio
+            </button>
+          </div>
+          <Suspense fallback={<LoadingFallback />}>
+            <PrivacyPolicy showDeletionInstructions={() => {
+              setShowPrivacyPage(false);
+              setShowDeletionPage(true);
+            }} />
+          </Suspense>
+          <div className="privacy-footer-nav">
+            <button onClick={() => setShowPrivacyPage(false)} className="back-button">
+              &larr; Volver al inicio
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Vista de instrucciones de eliminación de datos
+        <div className="privacy-page-container">
+          <div className="privacy-header">
+            <div className="header-nav-buttons">
+              <button onClick={() => {
+                setShowDeletionPage(false);
+                setShowPrivacyPage(false);
+              }} className="back-button">
+                &larr; Volver al inicio
+              </button>
+              <button onClick={() => {
+                setShowDeletionPage(false);
+                setShowPrivacyPage(true);
+              }} className="secondary-button">
+                Volver a Política de Privacidad
+              </button>
+            </div>
+          </div>
+          <Suspense fallback={<LoadingFallback />}>
+            <DataDeletionInstructions />
+          </Suspense>
+          <div className="privacy-footer-nav">
+            <button onClick={() => {
+              setShowDeletionPage(false);
+              setShowPrivacyPage(false);
+            }} className="back-button">
+              &larr; Volver al inicio
+            </button>
+          </div>
+        </div>
+      )}
       
       <footer className="footer">
         <div className="container">
@@ -78,6 +147,18 @@ function App() {
             </div>
             <div className="footer-info">
               <p>&copy; {new Date().getFullYear()} Next Step - Plantillas Digitalizadas a Medida</p>
+              <p>
+                <a 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowPrivacyPage(true);
+                  }}
+                  className="footer-link"
+                >
+                  Política de Privacidad
+                </a>
+              </p>
             </div>
             <div className="footer-social">
               <a 

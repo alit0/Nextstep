@@ -1,0 +1,87 @@
+.privacy-policy {
+  padding: 100px 0 60px;
+  background-color: #f8f9fa;
+}
+
+.privacy-content {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.privacy-icon {
+  margin-right: 10px;
+  color: #4a90e2;
+}
+
+.privacy-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.privacy-section:last-child {
+  border-bottom: none;
+}
+
+.privacy-section h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.privacy-section h4 {
+  color: #555;
+  margin: 1.5rem 0 1rem;
+  font-size: 1.2rem;
+}
+
+.privacy-section ul {
+  padding-left: 20px;
+  margin-bottom: 1rem;
+}
+
+.privacy-section li {
+  margin-bottom: 0.5rem;
+}
+
+.privacy-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  font-style: italic;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .privacy-policy {
+    padding: 80px 0 40px;
+  }
+  
+  .privacy-content {
+    padding: 1.5rem;
+    margin: 0 15px;
+  }
+  
+  .privacy-section h3 {
+    font-size: 1.3rem;
+  }
+  
+  .privacy-section h4 {
+    font-size: 1.1rem;
+  }
+}
+
+/* Estilo para links dentro de la política */
+.privacy-section a {
+  color: #4a90e2;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.privacy-section a:hover {
+  color: #2a6fc9;
+}
