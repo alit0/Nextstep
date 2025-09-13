@@ -1,0 +1,137 @@
+/* Estilos para el sistema de reconexión del chatbot */
+
+.system-message {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+  font-style: italic;
+  padding: 8px 12px;
+}
+
+/* Estilos para mensajes pendientes */
+.chat-message.bot .isPending {
+  background-color: #e8f4ff;
+  border-left: 4px solid #2196f3;
+  padding-left: 12px;
+}
+
+/* Indicador de mensaje pendiente */
+.pending-indicator {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 0.8em;
+  color: #2196f3;
+  animation: pulse 1.5s infinite;
+}
+
+/* Badge para mensajes pendientes */
+.pending-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2196f3;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.7em;
+  padding: 2px 8px;
+  margin-left: 8px;
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+}
+
+.chat-message.bot.typing span {
+  display: flex;
+  align-items: center;
+}
+
+.chat-message.bot.typing.reconnecting {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+/* Estilos para mensajes formateados y divididos */
+.chat-message.bot[data-formatted="true"] {
+  margin-bottom: 2px;
+  border-radius: 12px 12px 2px 12px;
+}
+
+.chat-message.bot[data-continuation="true"] {
+  margin-top: 2px;
+  border-radius: 2px 12px 12px 12px;
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in forwards;
+}
+
+/* Añadir un borde punteado para indicar continuación */
+.chat-message.bot[data-continuation="true"]:before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  border-top: 1px dotted #ccc;
+}
+
+/* Animación para mensajes formateados */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dot {
+  animation: pulse 1.5s infinite ease-in-out;
+  display: inline-block;
+  margin-left: 2px;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Estilos específicos para mensajes de error y reconexión */
+.chat-message.error {
+  background-color: #f8d7da;
+  border-left: 4px solid #dc3545;
+}
+
+.reconnection-overlay {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  background-color: #fff3cd;
+  padding: 8px;
+  text-align: center;
+  border-top: 1px solid #ffeeba;
+  animation: slideUp 0.3s ease-out forwards;
+  z-index: 2;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

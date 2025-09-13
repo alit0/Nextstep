@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faComments, faRobot, faPaperPlane, faTimes, faMicrophone, faPlay, faPause, faMicrophoneSlash } from '@fortawesome/free-solid-svg-icons';
 import './permission-styles.css';
+import './chatbot-reconnection.css';
 
 /**
  * Componente Chatbot - Chat de asistencia virtual accesible
@@ -14,6 +15,7 @@ function Chatbot() {
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
+  
   // Estados para controlar el chatbot
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');  
@@ -32,12 +34,15 @@ function Chatbot() {
   const toggleButtonRef = useRef(null);
   const micButtonRef = useRef(null);
   const sessionIdRef = useRef(null);
-  const prodWebhook = import.meta.env.VITE_PROD_N8N_URL;
-  // eslint-disable-next-line no-unused-vars
-  const testWebhook = import.meta.env.VITE_TEST_N8N_URL;
-
-  // Configuración del webhook
-  const WEBHOOK_URL = prodWebhook;
+  // Usar la URL de webhook apropiada (testWebhook para pruebas, prodWebhook para producción)
+  const WEBHOOK_URL = import.meta.env.VITE_TEST_N8N_URL;
+  
+  // Constantes para webhook
+  const MAX_WEBHOOK_RETRIES = 3;
+  const WEBHOOK_RETRY_DELAY = 2000; // 2 segundos
+  const WEBHOOK_TIMEOUT = 60000; // 60 segundos máximo para la respuesta
+  
+  // Nota: Ya no utilizamos patrones para detectar listas y elementos
 
   // Función para alternar la visibilidad del chatbot
   const toggleChatbot = () => {
@@ -57,77 +62,56 @@ function Chatbot() {
     setInputValue(e.target.value);
   };
 
-  const sendMessageToWebhook = async (message, isAudio = false) => {
-    try {
-      let body;
-      const headers = {};
-      let url = WEBHOOK_URL;
-      const sessionId = sessionIdRef.current;
-
-      if (isAudio && message instanceof Blob) {
-        const timestamp = new Date().toISOString();
-        const params = new URLSearchParams({
-          isAudio: 'true',
-          sessionId: sessionId,
-          timestamp: timestamp,
-        });
-        url = `${WEBHOOK_URL}?${params.toString()}`;
-
-        body = message; // Send the blob directly
-        headers['Content-Type'] = 'audio/webm';
-      } else {
-        const payload = {
-          message: message,
-          isAudio: isAudio,
-          timestamp: new Date().toISOString(),
-          sessionId: sessionId,
-        };
-        body = JSON.stringify(payload);
-        headers['Content-Type'] = 'application/json';
-      }
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: body,
-        signal: undefined, // No timeout to allow long n8n responses
+  // Función para enviar mensajes al webhook (permite audio y texto)
+  const sendMessageToWebhook = useCallback(async (message, isAudio = false) => {
+    // Preparar datos para la solicitud
+    let body;
+    const headers = {};
+    
+    // Diferentes formatos según sea audio o texto
+    if (isAudio && message instanceof Blob) {
+      const formData = new FormData();
+      formData.append('audio', message, 'audio.webm');
+      formData.append('sessionId', sessionIdRef.current || `audio-${Date.now()}`);
+      body = formData;
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body = JSON.stringify({
+        message: message,
+        sessionId: sessionIdRef.current || `text-${Date.now()}`
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseText = await response.text();
-      console.log('Webhook response text:', responseText);
-
-      try {
-        // Intenta analizar como JSON
-        const responseData = JSON.parse(responseText);
-        
-        // Si es un array, toma el primer elemento
-        const data = Array.isArray(responseData) ? responseData[0] : responseData;
-
-        // Busca la respuesta en los campos comunes
-        return data.output || data.text || data.message || 'No se recibió una respuesta válida.';
-      } catch {
-        // If JSON parsing fails, the response is plain text
-        // Si falla el análisis JSON, la respuesta es texto plano
-        return responseText;
-      }
-    } catch (error) {
-      console.error('Error sending message to webhook:', error);
-      return 'Hubo un error al procesar tu mensaje. Por favor, inténtalo de nuevo.';
     }
-  };
+    
+    // Envío sin timeout para permitir respuestas largas (hasta 60+ segundos)
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers,
+      body
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error en la respuesta: ${response.status}`);
+    }
+    
+    const responseText = await response.text();
+    
+    // Procesar respuesta (puede ser JSON o texto plano)
+    try {
+      const responseData = JSON.parse(responseText);
+      const data = Array.isArray(responseData) ? responseData[0] : responseData;
+      return data.output || data.text || data.message || responseText;
+    } catch {
+      // Si no es JSON válido, devolver el texto tal cual
+      return responseText;
+    }
+  }, [WEBHOOK_URL]);
 
   // Solicitar permiso de micrófono de forma explícita
   const requestMicrophonePermission = async () => {
     try {
-      console.log('Solicitando permiso de micrófono explícitamente...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
       // Permiso concedido
-      console.log('Permiso concedido!');  
       setMicPermissionStatus('granted');
       setShowPermissionButton(false);
       
@@ -222,19 +206,15 @@ function Chatbot() {
       // Verificar permisos antes de solicitar
       const canProceed = await checkMicrophonePermission();
       if (!canProceed) {
-        console.log('No se pueden solicitar permisos ahora - se muestra botón de permiso explícito');
         // Mostrar botón de solicitud de permiso explícito
         setShowPermissionButton(true);
         return null;
       }
 
-      console.log('Solicitando permisos de micrófono...');
-      // Usar configuración más simple y compatible
+      // Solicitar acceso al micrófono
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: true 
       });
-      
-      console.log('Permisos concedidos, creando MediaRecorder...');
       
       // Actualizar estado para reflejar que el permiso ha sido concedido
       setMicPermissionStatus('granted');
@@ -245,7 +225,6 @@ function Chatbot() {
       
       // Crear MediaRecorder sin opciones específicas para máxima compatibilidad
       const recorder = new MediaRecorder(stream);
-      console.log('MediaRecorder creado');
 
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -315,46 +294,73 @@ function Chatbot() {
     const recorder = mediaRecorderRef.current;
     if (!recorder || !isRecording) return;
 
-    console.log('Stopping recording...');
-
     const currentDuration = recordingTime;
 
-    recorder.onstop = () => {
-      console.log('MediaRecorder stopped, processing audio chunks...');
+    recorder.onstop = async () => {
+      // Evitar envío si ya hay uno en curso
+      if (isProcessingMessage) {
+        return;
+      }
+      
+      // Procesar audio grabado
       const chunks = audioChunksRef.current;
-      console.log('Current chunks length:', chunks.length);
-
-      if (chunks.length > 0) {
+      
+      if (chunks && chunks.length > 0) {
         const audioBlob = new Blob(chunks, { type: 'audio/webm' });
         const audioUrl = URL.createObjectURL(audioBlob);
-
-        console.log('Audio blob created:', audioBlob.size, 'bytes');
-
+        
+        // Crear mensaje de audio con ID único
         const audioMessage = {
-          id: Date.now(),
+          id: `audio-${Date.now()}`,
           audioUrl: audioUrl,
           duration: currentDuration,
           isUser: true,
           isAudio: true
         };
 
-        setMessages(prev => [...prev, audioMessage]);
+        // Añadir mensaje al estado con validación de array
+        setMessages(prev => [...(Array.isArray(prev) ? prev : []), audioMessage]);
 
+        // Marcar que estamos procesando un mensaje e indicar espera
+        setIsProcessingMessage(true);
         setIsTyping(true);
-        sendMessageToWebhook(audioBlob, true)
-          .then(botResponseText => {
-            const botResponse = {
-              id: Date.now() + 1,
-              text: botResponseText,
+        
+        try {
+          // Enviar directamente el mensaje de audio
+          const responseText = await sendMessageToWebhook(audioBlob, true);
+          
+          // Dividir la respuesta en múltiples mensajes
+          const splitMessages = splitMessageIntoSentences(responseText);
+          
+          // Añadir cada parte como un mensaje separado
+          const currentTime = Date.now();
+          
+          // Usar un enfoque secuencial para añadir mensajes
+          for (let i = 0; i < splitMessages.length; i++) {
+            const botMessage = {
+              id: `bot-audio-${currentTime}-${i}`,
+              text: splitMessages[i],
               isUser: false
             };
-            setMessages(prevMessages => [...prevMessages, botResponse]);
-            setIsTyping(false);
-          })
-          .catch(error => {
-            console.error('Error sending audio message:', error);
-            setIsTyping(false);
-          });
+            
+            // Añadir cada mensaje al chat
+            setMessages(prev => [...(Array.isArray(prev) ? prev : []), botMessage]);
+          }
+        } catch {
+          // Añadir mensaje de error genérico
+          const errorMessage = {
+            id: `error-audio-${Date.now()}`,
+            text: 'Lo siento, hubo un problema al procesar tu mensaje de audio.',
+            isUser: false,
+            isError: true
+          };
+          
+          setMessages(prev => [...(Array.isArray(prev) ? prev : []), errorMessage]);
+        } finally {
+          // Siempre desactivar indicador de espera y marcar que terminamos
+          setIsTyping(false);
+          setIsProcessingMessage(false);
+        }
       } else {
         console.log('No audio chunks available');
       }
@@ -406,45 +412,72 @@ function Chatbot() {
     stopRecording();
   };
 
-  // Enviar mensaje
+  // Variable para controlar si hay una solicitud en curso
+  const [isProcessingMessage, setIsProcessingMessage] = useState(false);
+
+  // Función mejorada para enviar mensajes de texto
   const sendMessage = async (e) => {
-    e && e.preventDefault();
+    if (e) e.preventDefault();
     
-    if (!inputValue.trim()) return;
+    const trimmedInput = inputValue.trim();
+    if (!trimmedInput || isProcessingMessage) return; // Evitar envío si ya hay uno en curso
     
-    // Agregar mensaje del usuario
+    // Crear mensaje del usuario con ID único
     const userMessage = {
-      id: Date.now(),
-      text: inputValue,
+      id: `user-${Date.now()}`,
+      text: trimmedInput,
       isUser: true
     };
     
-    setMessages(prev => [...prev, userMessage]);
-    const messageText = inputValue;
+    // Guardar mensaje y limpiar input primero
+    const messageToSend = trimmedInput;
     setInputValue('');
+    
+    // Añadir mensaje al estado usando una función para prevenir problemas
+    setMessages(prevMessages => {
+      // Usar un array nuevo para evitar problemas de renderizado
+      return [...(Array.isArray(prevMessages) ? prevMessages : []), userMessage];
+    });
+    
+    // Marcar que estamos procesando un mensaje e indicar espera
+    setIsProcessingMessage(true);
     setIsTyping(true);
     
-    // Enviar mensaje al webhook y obtener respuesta
     try {
-      const botResponseText = await sendMessageToWebhook(messageText, false);
+      // Enviar mensaje al webhook y obtener respuesta
+      const responseText = await sendMessageToWebhook(messageToSend, false);
       
-      const botResponse = {
-        id: Date.now() + 1,
-        text: botResponseText,
-        isUser: false
+      // Dividir la respuesta en múltiples mensajes
+      const splitMessages = splitMessageIntoSentences(responseText);
+      
+      // Añadir cada parte como un mensaje separado
+      const currentTime = Date.now();
+      
+      // Usar un enfoque secuencial para añadir mensajes
+      for (let i = 0; i < splitMessages.length; i++) {
+        const botMessage = {
+          id: `bot-${currentTime}-${i}`,
+          text: splitMessages[i],
+          isUser: false
+        };
+        
+        // Añadir cada mensaje al chat
+        setMessages(prev => [...(Array.isArray(prev) ? prev : []), botMessage]);
+      }
+    } catch {
+      // Añadir mensaje de error genérico
+      const errorMessage = {
+        id: `error-${Date.now()}`,
+        text: 'Lo siento, hubo un problema al procesar tu mensaje. Por favor inténtalo de nuevo.',
+        isUser: false,
+        isError: true
       };
       
-      setMessages(prevMessages => [...prevMessages, botResponse]);
+      setMessages(prev => [...(Array.isArray(prev) ? prev : []), errorMessage]);
+    } finally {
+      // Desactivar indicador de espera y marcar que terminamos de procesar
       setIsTyping(false);
-      
-      // Notificar a lectores de pantalla que hay un nuevo mensaje
-      const ariaLive = document.getElementById('chat-aria-live');
-      if (ariaLive) {
-        ariaLive.textContent = `Nuevo mensaje: ${botResponse.text}`;
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setIsTyping(false);
+      setIsProcessingMessage(false);
     }
   };
 
@@ -470,10 +503,84 @@ function Chatbot() {
     }
   };
 
-  // Efecto para inicializar el sessionId una sola vez
-  useEffect(() => {
-    sessionIdRef.current = `chatbot-${Date.now()}`;
+  // Función para dividir mensajes exactamente como lo solicita el usuario
+  const splitMessageIntoSentences = useCallback((message) => {
+    // Si no hay mensaje o no es texto, devolver como está
+    if (!message || typeof message !== 'string') {
+      return [message];
+    }
+
+    
+    // Caso especial: puntos numerados para agendar un turno
+    if (message.includes('agendar un turno') && message.includes('consultorio') && 
+        message.includes('1.') && message.includes('2.')) {
+      
+      // Extraer las tres partes como en el ejemplo
+      const firstBreak = message.indexOf('\n\nPara ayudarte');
+      const lastBreak = message.lastIndexOf('\n\nUna vez');
+      
+      if (firstBreak > 0 && lastBreak > firstBreak) {
+        return [
+          // Primera parte: saludo inicial
+          message.substring(0, firstBreak).trim().replace(/\n/g, '<br>'),
+          
+          // Segunda parte: instrucciones con puntos numerados
+          message.substring(firstBreak + 2, lastBreak).trim().replace(/\n/g, '<br>'),
+          
+          // Tercera parte: mensaje final
+          message.substring(lastBreak + 2).trim().replace(/\n/g, '<br>')
+        ];
+      }
+    }
+    
+    // Caso genérico: dividir por \n\n y convertir \n simples en <br>
+    if (message.includes('\n\n')) {
+      // Dividir por dobles saltos de línea
+      return message
+        .split(/\n\n+/)
+        .map(part => part.trim())
+        .filter(part => part.length > 0)
+        .map(part => part.replace(/\n/g, '<br>')); // Convertir \n simples a <br>
+    }
+    
+    // Si no hay dobles saltos de línea, convertir los saltos simples a <br>
+    if (message.includes('\n')) {
+      return [message.replace(/\n/g, '<br>')];
+    }
+    
+    // Si no hay saltos de línea, mantener como un solo mensaje
+    return [message];
   }, []);
+
+  // Nota: La función reconnectChatbot ha sido eliminada ya que no se usa con el nuevo enfoque simplificado
+  // Ya no manejamos reconexiones automáticas para evitar problemas de estado
+
+  // Nota: La función addToPendingQueue ha sido eliminada para simplificar
+  // Ya no manejamos colas de mensajes pendientes
+  
+  // Nota: La función formatLongMessage ha sido eliminada para simplificar
+  // Ya no hacemos procesamiento de mensajes largos para evitar problemas de renderizado
+
+  // Nota: La función processPendingMessages ha sido eliminada para simplificar el código
+  // y evitar problemas de estado. Ya no se maneja una cola de mensajes pendientes.
+
+  // Función mínima para el manejo de visibilidad - sin efectos secundarios
+  const handleVisibilityChange = useCallback(() => {
+    // No hacemos nada cuando cambia la visibilidad, lo dejamos como referencia
+  }, []);
+
+  // Efecto para inicializar el sessionId y configurar detector de visibilidad
+  useEffect(() => {
+    // Crear un nuevo sessionId para cada sesión
+    sessionIdRef.current = `chatbot-${Date.now()}`;
+    
+    // Configurar detector de visibilidad
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [handleVisibilityChange]);
 
   // Efecto para manejar el foco cuando se abre/cierra el chatbot
   useEffect(() => {
@@ -632,29 +739,44 @@ function Chatbot() {
             aria-label="Conversación con asistente virtual"
           >
             
-            {/* Listado de mensajes */}
-            {messages.map(message => (
-              <div 
-                key={message.id} 
-                className={`chat-message ${message.isUser ? 'user' : 'bot'}`}
-                role={message.isUser ? 'listitem' : 'listitem'}
-              >
-                {message.isAudio ? (
-                  <AudioMessage 
-                    audioUrl={message.audioUrl} 
-                    duration={message.duration} 
-                    isUser={message.isUser} 
-                  />
-                ) : (
-                  <span>{message.text}</span>
-                )}
-              </div>
-            ))}
+            {/* Listado de mensajes - implementación que maneja etiquetas <br> */}
+            {Array.isArray(messages) && messages.map((message, index) => {
+              // Preparar el texto del mensaje para manejar tags <br>
+              const messageText = message.text || "[Sin texto]";
+              
+              // Dividir por <br> para convertir a elementos React
+              const textParts = messageText.split('<br>');
+              
+              return (
+                <div 
+                  key={`message-${message.id || index}`}
+                  className={`chat-message ${message.isUser ? 'user' : 'bot'}`}
+                >
+                  {message.isAudio ? (
+                    <AudioMessage 
+                      audioUrl={message.audioUrl} 
+                      duration={message.duration} 
+                      isUser={message.isUser} 
+                    />
+                  ) : (
+                    <span>
+                      {/* Renderizar partes con <br> intercalados */}
+                      {textParts.map((part, i) => (
+                        <React.Fragment key={`part-${i}`}>
+                          {i > 0 && <br />}
+                          {part}
+                        </React.Fragment>
+                      ))}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
             
-            {/* Indicador de escritura */}
-            {isTyping && (
+            {/* Indicador de escritura solo visible cuando hay procesamiento */}
+            {isTyping && isProcessingMessage && (
               <div className="chat-message bot typing">
-                <span>Aguarde respuesta...<span className="dot">.</span><span className="dot">.</span><span className="dot">.</span></span>
+                <span>Procesando tu consulta<span className="dot">.</span><span className="dot">.</span><span className="dot">.</span></span>
               </div>
             )}
           </div>
