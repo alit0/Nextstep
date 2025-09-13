@@ -1,4 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import '../index.css';
 import '../accessibility.css';
 import '../fixes.css';
@@ -148,7 +149,7 @@ function App() {
             <div className="footer-info">
               <p>&copy; {new Date().getFullYear()} Next Step - Plantillas Digitalizadas a Medida</p>
               <p>
-                <a href="/politicas" className="footer-link">Política de Privacidad</a>
+                <Link to="/politicas" className="footer-link">Política de Privacidad</Link>
               </p>
             </div>
             <div className="footer-social">
