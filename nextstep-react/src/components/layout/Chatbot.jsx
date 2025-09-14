@@ -35,7 +35,7 @@ function Chatbot() {
   const micButtonRef = useRef(null);
   const sessionIdRef = useRef(null);
   // Usar la URL de webhook apropiada (testWebhook para pruebas, prodWebhook para producción)
-  const WEBHOOK_URL = import.meta.env.VITE_TEST_N8N_URL;
+  const WEBHOOK_URL = import.meta.env.VITE_PROD_N8N_URL;
   
   // Constantes para webhook
   const MAX_WEBHOOK_RETRIES = 3;
